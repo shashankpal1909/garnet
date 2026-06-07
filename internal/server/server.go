@@ -24,10 +24,17 @@ func New(cfg *config.Config) *Server {
 // Start begins listening for TCP connections
 // and blocks until the server terminates.
 func (s *Server) Start() error {
+
 	addr := fmt.Sprintf(
 		"%s:%d",
 		s.cfg.Host,
 		s.cfg.Port,
+	)
+
+	logger.Logger.Print(Banner)
+	logger.Logger.Printf(
+		"listening on %s",
+		addr,
 	)
 
 	listener, err := net.Listen("tcp", addr)
