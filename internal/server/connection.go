@@ -1,12 +1,12 @@
 package server
 
 import (
-	"bufio"
+	"io"
 	"net"
-	"strings"
 
+	"garnet/internal/command"
 	"garnet/internal/logger"
-	"garnet/internal/protocol"
+	"garnet/internal/resp"
 )
 
 // HandleConnection manages the lifecycle
@@ -24,24 +24,29 @@ func HandleConnection(conn net.Conn) {
 		conn.RemoteAddr(),
 	)
 
-	scanner := bufio.NewScanner(conn)
+	decoder := resp.NewDecoder(conn)
 
-	for scanner.Scan() {
-		input := strings.TrimSpace(
-			scanner.Text(),
-		)
+	for {
+		value, err := decoder.Decode()
+		if err != nil {
+			if err != io.EOF {
+				logger.Logger.Printf(
+					"connection read error: %v",
+					err,
+				)
+			}
+			return
+		}
 
 		logger.Logger.Printf(
-			"received command from %s: %s",
+			"received command from %s: %+v",
 			conn.RemoteAddr(),
-			input,
+			value,
 		)
 
-		response := protocol.Handle(input)
+		response := command.Dispatch(value)
 
-		if _, err := conn.Write(
-			[]byte(response + "\n"),
-		); err != nil {
+		if _, err := conn.Write(response); err != nil {
 
 			logger.Logger.Printf(
 				"write failed: %v",
@@ -50,12 +55,5 @@ func HandleConnection(conn net.Conn) {
 
 			return
 		}
-	}
-
-	if err := scanner.Err(); err != nil {
-		logger.Logger.Printf(
-			"connection read error: %v",
-			err,
-		)
 	}
 }
