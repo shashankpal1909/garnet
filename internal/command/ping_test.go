@@ -26,12 +26,19 @@ func TestPing(t *testing.T) {
 			want: []byte("$5\r\nhello\r\n"),
 		},
 		{
-			name: "Multiple Arguments (fallback)",
+			name: "Too Many Arguments",
 			args: []resp.Value{
 				{Type: resp.BulkString, Data: []byte("hello")},
 				{Type: resp.BulkString, Data: []byte("world")},
 			},
-			want: []byte("+PONG\r\n"),
+			want: []byte("-ERR wrong number of arguments for 'ping' command\r\n"),
+		},
+		{
+			name: "Wrong Argument Type",
+			args: []resp.Value{
+				{Type: resp.Integer, Data: int64(1)},
+			},
+			want: []byte("-ERR wrong number of arguments for 'ping' command\r\n"),
 		},
 	}
 
