@@ -14,13 +14,13 @@ type Config struct {
 func Load() *Config {
 	host := flag.String(
 		"host",
-		"0.0.0.0",
+		DefaultHost,
 		"host address to bind",
 	)
 
 	port := flag.Int(
 		"port",
-		6379,
+		DefaultPort,
 		"tcp port to listen on",
 	)
 
