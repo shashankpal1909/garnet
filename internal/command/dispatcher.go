@@ -11,6 +11,7 @@ type CommandFunc func(args []resp.Value) []byte
 var registry = map[string]CommandFunc{
 	"PING":  Ping,
 	"HELLO": Hello,
+	"ECHO":  Echo,
 }
 
 // Dispatch routes incoming commands to their corresponding handlers.
