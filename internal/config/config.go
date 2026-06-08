@@ -25,7 +25,7 @@ func Load() *Config {
 		DefaultPort,
 		"tcp port to listen on",
 	)
-	
+
 	mode := flag.String(
 		"mode",
 		DefaultMode,

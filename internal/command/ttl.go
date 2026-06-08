@@ -32,7 +32,7 @@ func TTL(args []resp.Value) []byte {
 
 	// Calculate remaining time to live in seconds
 	remainingMs := item.ExpiresAt - time.Now().UnixMilli()
-	
+
 	// Convert to seconds, rounding down
 	ttlSec := remainingMs / 1000
 

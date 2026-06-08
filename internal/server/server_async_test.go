@@ -127,7 +127,7 @@ func TestAsyncServer_EndToEnd(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to read from async server after partial writes: %v", err)
 	}
-	
+
 	got = buf[:n]
 	want = []byte("$5\r\nHELLO\r\n")
 	if !bytes.Equal(got, want) {
@@ -136,7 +136,7 @@ func TestAsyncServer_EndToEnd(t *testing.T) {
 
 	// Test empty read/disconnection
 	conn.Close()
-	
+
 	// Wait a moment for server to process disconnection
 	time.Sleep(50 * time.Millisecond)
 }

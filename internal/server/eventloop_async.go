@@ -5,8 +5,10 @@ package server
 import (
 	"fmt"
 	"syscall"
+	"time"
 
 	"garnet/internal/logger"
+	"garnet/internal/store"
 )
 
 func (s *AsyncServer) startEventLoop() error {
@@ -27,8 +29,10 @@ func (s *AsyncServer) startEventLoop() error {
 	events := make([]syscall.EpollEvent, s.cfg.MaxClients)
 	logger.Logger.Printf("epoll event loop started")
 
+	lastExpireRun := time.Now()
+
 	for {
-		n, err := syscall.EpollWait(epfd, events, -1)
+		n, err := syscall.EpollWait(epfd, events, 100) // 100ms timeout
 		if err != nil {
 			if err == syscall.EINTR {
 				continue
@@ -50,6 +54,15 @@ func (s *AsyncServer) startEventLoop() error {
 					}
 				}
 			}
+		}
+
+		// Run active expiration if 100ms has passed
+		if time.Since(lastExpireRun) >= 100*time.Millisecond {
+			deleted := store.ActiveExpire()
+			if deleted > 0 {
+				logger.Logger.Printf("active expiration removed %d keys", deleted)
+			}
+			lastExpireRun = time.Now()
 		}
 	}
 }

@@ -9,8 +9,7 @@ import (
 )
 
 func TestSetCommand(t *testing.T) {
-	// Reset store
-	store.Put("test_key", nil) // Just to make sure it's clean, but let's actually just run commands
+	// store.Delete("test_key") // Just to make sure it's clean, but let's actually just run commands
 
 	t.Run("Basic SET", func(t *testing.T) {
 		args := []resp.Value{

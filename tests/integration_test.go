@@ -97,4 +97,46 @@ func TestIntegrationSetGet(t *testing.T) {
 			t.Errorf("Expected TTL of -1, got %d", ttl)
 		}
 	})
+
+	t.Run("EXPIRE and DEL", func(t *testing.T) {
+		// Set a key
+		_, err := conn.Do("SET", "modify_key", "val")
+		if err != nil {
+			t.Fatalf("Failed to SET: %v", err)
+		}
+
+		// Expire it in 1 second
+		res, err := redis.Int(conn.Do("EXPIRE", "modify_key", 1))
+		if err != nil {
+			t.Fatalf("Failed to EXPIRE: %v", err)
+		}
+		if res != 1 {
+			t.Errorf("Expected EXPIRE to return 1, got %d", res)
+		}
+
+		// TTL should now be 1 (or 0 if fraction)
+		ttl, err := redis.Int(conn.Do("TTL", "modify_key"))
+		if err != nil {
+			t.Fatalf("Failed to check TTL: %v", err)
+		}
+		if ttl != 1 && ttl != 0 {
+			t.Errorf("Expected TTL of 1 or 0, got %d", ttl)
+		}
+
+		// Delete the key early
+		delCount, err := redis.Int(conn.Do("DEL", "modify_key", "missing_key"))
+		if err != nil {
+			t.Fatalf("Failed to DEL: %v", err)
+		}
+		// Since missing_key doesn't exist, it should return 1
+		if delCount != 1 {
+			t.Errorf("Expected DEL to return 1, got %d", delCount)
+		}
+
+		// Verify it's gone immediately
+		_, err = redis.String(conn.Do("GET", "modify_key"))
+		if err != redis.ErrNil {
+			t.Errorf("Expected redis.ErrNil after DEL, got %v", err)
+		}
+	})
 }

@@ -15,7 +15,7 @@ func Get(args []resp.Value) []byte {
 	}
 
 	key := string(args[0].Data.([]byte))
-	
+
 	// Retrieve the item from the store.
 	// Note: store.Get() internally checks for expiration and will return nil if expired.
 	item := store.Get(key)

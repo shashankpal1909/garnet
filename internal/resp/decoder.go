@@ -47,7 +47,7 @@ func readLine(data []byte, offset int) (line []byte, newOffset int, err error) {
 	if data[offset+idx+1] != '\n' {
 		return nil, 0, errors.New("invalid line ending")
 	}
-	
+
 	line = data[offset : offset+idx]
 	return line, offset + idx + 2, nil
 }

@@ -24,7 +24,7 @@ func NewAsyncConnection(fd int) *AsyncConnection {
 
 func (c *AsyncConnection) Read() error {
 	buf := make([]byte, 4096)
-	
+
 	// Read as much data as is available from the non-blocking socket
 	n, err := syscall.Read(c.fd, buf)
 	if err != nil {

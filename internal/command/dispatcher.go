@@ -9,12 +9,14 @@ import (
 type CommandFunc func(args []resp.Value) []byte
 
 var registry = map[string]CommandFunc{
-	"PING":  Ping,
-	"HELLO": Hello,
-	"ECHO":  Echo,
-	"SET":   Set,
-	"GET":   Get,
-	"TTL":   TTL,
+	"PING":   Ping,
+	"HELLO":  Hello,
+	"ECHO":   Echo,
+	"SET":    Set,
+	"GET":    Get,
+	"TTL":    TTL,
+	"DEL":    Del,
+	"EXPIRE": Expire,
 }
 
 // Dispatch routes incoming commands to their corresponding handlers.
