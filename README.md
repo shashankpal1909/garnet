@@ -27,6 +27,7 @@ By sidestepping the overhead of traditional thread-per-connection models and uti
 - **Redis Compatible:** Implements RESP, meaning your existing Redis clients (e.g., `redis-cli`, Jedis, Go-Redis) work out of the box!
 - **High Performance:** Designed to deliver high throughput and low latency on minimal hardware.
 - **Key Expiration Engine:** Native active & passive TTL enforcement for cache invalidation.
+- **Memory Management:** Configurable max key limits with pluggable eviction policies (`noeviction`, `allkeys-random`, `volatile-random`).
 - **Lightweight & Containerized:** Provided via an Alpine-based Docker image. No heavy dependencies.
 
 ## 🛠️ Installation & Quick Start
