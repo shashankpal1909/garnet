@@ -4,8 +4,8 @@
     <strong>A high-performance, purely asynchronous, Redis-compatible in-memory data store written in Go.</strong>
   </p>
   <p align="center">
-    <a href="https://golang.org/doc/go1.21"><img src="https://img.shields.io/badge/Go-1.21+-00ADD8?style=for-the-badge&logo=go" alt="Go Version" /></a>
-    <a href="https://github.com/shashankpal1909/garnet/actions"><img src="https://img.shields.io/badge/Build-Passing-brightgreen?style=for-the-badge&logo=githubactions" alt="Build Status" /></a>
+    <a href="https://golang.org/doc/go1.26"><img src="https://img.shields.io/badge/Go-1.26.3-00ADD8?style=for-the-badge&logo=go" alt="Go Version" /></a>
+    <a href="https://github.com/shashankpal1909/garnet/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/shashankpal1909/garnet/ci.yml?style=for-the-badge&logo=githubactions" alt="Build Status" /></a>
     <a href="https://hub.docker.com/r/library/garnet"><img src="https://img.shields.io/badge/Docker-Supported-2496ED?style=for-the-badge&logo=docker" alt="Docker Support" /></a>
     <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge" alt="License: MIT" /></a>
     <a href="https://github.com/shashankpal1909/garnet/pulls"><img src="https://img.shields.io/badge/PRs-Welcome-ff69b4.svg?style=for-the-badge" alt="PRs Welcome" /></a>
