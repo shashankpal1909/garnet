@@ -11,7 +11,7 @@ import (
 	"garnet/internal/store"
 )
 
-func (s *AsyncServer) startEventLoop() error {
+func (s *Server) startEventLoop() error {
 	epfd, err := syscall.EpollCreate1(0)
 	if err != nil {
 		return fmt.Errorf("epoll_create1 error: %v", err)
@@ -67,7 +67,7 @@ func (s *AsyncServer) startEventLoop() error {
 	}
 }
 
-func (s *AsyncServer) accept() {
+func (s *Server) accept() {
 	nfd, _, err := syscall.Accept(s.fd)
 	if err != nil {
 		if err == syscall.EAGAIN || err == syscall.EWOULDBLOCK {
@@ -92,18 +92,18 @@ func (s *AsyncServer) accept() {
 		return
 	}
 
-	s.connections[nfd] = NewAsyncConnection(nfd)
+	s.connections[nfd] = NewConnection(nfd)
 	logger.Logger.Printf("client connected: fd %d", nfd)
 }
 
-func (s *AsyncServer) read(conn *AsyncConnection) {
+func (s *Server) read(conn *Connection) {
 	err := conn.Read()
 	if err != nil {
 		s.closeConnection(conn.fd)
 	}
 }
 
-func (s *AsyncServer) closeConnection(fd int) {
+func (s *Server) closeConnection(fd int) {
 	logger.Logger.Printf("client disconnected: fd %d", fd)
 	syscall.Close(fd)
 	delete(s.connections, fd)

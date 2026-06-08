@@ -11,23 +11,23 @@ import (
 	"garnet/internal/logger"
 )
 
-type AsyncServer struct {
+type Server struct {
 	cfg         *config.Config
 	fd          int
 	epfd        int
-	connections map[int]*AsyncConnection
+	connections map[int]*Connection
 }
 
-func NewAsyncServer(cfg *config.Config) *AsyncServer {
-	return &AsyncServer{
+func NewServer(cfg *config.Config) *Server {
+	return &Server{
 		cfg:         cfg,
-		connections: make(map[int]*AsyncConnection),
+		connections: make(map[int]*Connection),
 	}
 }
 
-func (s *AsyncServer) Start() error {
+func (s *Server) Start() error {
 	logger.Logger.Print(Banner)
-	logger.Logger.Printf("starting async epoll server on %s:%d", s.cfg.Host, s.cfg.Port)
+	logger.Logger.Printf("starting epoll server on %s:%d", s.cfg.Host, s.cfg.Port)
 
 	// 1. Create socket
 	fd, err := syscall.Socket(syscall.AF_INET, syscall.SOCK_STREAM, 0)

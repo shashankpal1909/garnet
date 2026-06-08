@@ -13,20 +13,20 @@ import (
 	"garnet/internal/server"
 )
 
-func TestAsyncServer_New(t *testing.T) {
+func TestServer_New(t *testing.T) {
 	cfg := &config.Config{
 		Host:       "127.0.0.1",
 		Port:       6379,
 		MaxClients: 10,
 	}
 
-	srv := server.NewAsyncServer(cfg)
+	srv := server.NewServer(cfg)
 	if srv == nil {
-		t.Fatal("Expected NewAsyncServer to return an AsyncServer instance, got nil")
+		t.Fatal("Expected NewServer to return an Server instance, got nil")
 	}
 }
 
-func TestAsyncServer_StartError(t *testing.T) {
+func TestServer_StartError(t *testing.T) {
 	// Bind to port 0 to get a random free port
 	l, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
@@ -42,7 +42,7 @@ func TestAsyncServer_StartError(t *testing.T) {
 		MaxClients: 10,
 	}
 
-	srv := server.NewAsyncServer(cfg)
+	srv := server.NewServer(cfg)
 
 	// Start should immediately return an error because the port is already bound by our listener
 	errCh := make(chan error, 1)
@@ -60,7 +60,7 @@ func TestAsyncServer_StartError(t *testing.T) {
 	}
 }
 
-func TestAsyncServer_EndToEnd(t *testing.T) {
+func TestServer_EndToEnd(t *testing.T) {
 	// Get a random free port for the async server
 	l, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
@@ -75,7 +75,7 @@ func TestAsyncServer_EndToEnd(t *testing.T) {
 		MaxClients: 10,
 	}
 
-	srv := server.NewAsyncServer(cfg)
+	srv := server.NewServer(cfg)
 	go func() {
 		_ = srv.Start()
 	}()

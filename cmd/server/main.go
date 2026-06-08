@@ -10,17 +10,9 @@ import (
 func main() {
 	cfg := config.Load()
 
-	var startFunc func() error
+	srv := server.NewServer(cfg)
 
-	if cfg.Mode == "async" {
-		srv := server.NewAsyncServer(cfg)
-		startFunc = srv.Start
-	} else {
-		srv := server.NewSyncServer(cfg)
-		startFunc = srv.Start
-	}
-
-	if err := startFunc(); err != nil {
+	if err := srv.Start(); err != nil {
 		log.Fatal(err)
 	}
 }

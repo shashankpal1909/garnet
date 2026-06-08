@@ -19,5 +19,5 @@ COPY --from=builder /app/garnet .
 
 EXPOSE 6379
 
-# Boot in async mode by default
-CMD ["./garnet", "--mode=async"]
+# Boot the server
+CMD ["./garnet"]

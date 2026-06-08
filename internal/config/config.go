@@ -7,7 +7,6 @@ import "flag"
 type Config struct {
 	Host       string
 	Port       int
-	Mode       string
 	MaxClients int
 }
 
@@ -26,12 +25,6 @@ func Load() *Config {
 		"tcp port to listen on",
 	)
 
-	mode := flag.String(
-		"mode",
-		DefaultMode,
-		"server mode: sync or async",
-	)
-
 	maxClients := flag.Int(
 		"max-clients",
 		DefaultMaxClients,
@@ -43,7 +36,6 @@ func Load() *Config {
 	return &Config{
 		Host:       *host,
 		Port:       *port,
-		Mode:       *mode,
 		MaxClients: *maxClients,
 	}
 }

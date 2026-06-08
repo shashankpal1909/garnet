@@ -10,19 +10,19 @@ import (
 	"garnet/internal/resp"
 )
 
-type AsyncConnection struct {
+type Connection struct {
 	fd     int
 	buffer []byte
 }
 
-func NewAsyncConnection(fd int) *AsyncConnection {
-	return &AsyncConnection{
+func NewConnection(fd int) *Connection {
+	return &Connection{
 		fd:     fd,
 		buffer: make([]byte, 0, 4096),
 	}
 }
 
-func (c *AsyncConnection) Read() error {
+func (c *Connection) Read() error {
 	buf := make([]byte, 4096)
 
 	// Read as much data as is available from the non-blocking socket
@@ -73,7 +73,7 @@ func (c *AsyncConnection) Read() error {
 	return nil
 }
 
-func (c *AsyncConnection) Write(data []byte) {
+func (c *Connection) Write(data []byte) {
 	var total int
 	for total < len(data) {
 		n, err := syscall.Write(c.fd, data[total:])
