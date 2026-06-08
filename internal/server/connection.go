@@ -1,61 +1,88 @@
+//go:build linux
+
 package server
 
 import (
-	"bufio"
-	"net"
-	"strings"
+	"syscall"
 
+	"garnet/internal/command"
 	"garnet/internal/logger"
-	"garnet/internal/protocol"
+	"garnet/internal/resp"
 )
 
-// HandleConnection manages the lifecycle
-// of a single client connection.
-func HandleConnection(conn net.Conn) {
-	defer conn.Close()
+type Connection struct {
+	fd     int
+	buffer []byte
+}
 
-	logger.Logger.Printf(
-		"client connected: %s",
-		conn.RemoteAddr(),
-	)
+func NewConnection(fd int) *Connection {
+	return &Connection{
+		fd:     fd,
+		buffer: make([]byte, 0, 4096),
+	}
+}
 
-	defer logger.Logger.Printf(
-		"client disconnected: %s",
-		conn.RemoteAddr(),
-	)
+func (c *Connection) Read() error {
+	buf := make([]byte, 4096)
 
-	scanner := bufio.NewScanner(conn)
+	// Read as much data as is available from the non-blocking socket
+	n, err := syscall.Read(c.fd, buf)
+	if err != nil {
+		if err == syscall.EAGAIN || err == syscall.EWOULDBLOCK {
+			return nil
+		}
+		return err
+	}
 
-	for scanner.Scan() {
-		input := strings.TrimSpace(
-			scanner.Text(),
-		)
+	if n == 0 {
+		return syscall.ECONNRESET // Client closed the connection
+	}
 
-		logger.Logger.Printf(
-			"received command from %s: %s",
-			conn.RemoteAddr(),
-			input,
-		)
+	c.buffer = append(c.buffer, buf[:n]...)
 
-		response := protocol.Handle(input)
+	// Process all complete RESP commands currently in the buffer
+	for {
+		if len(c.buffer) == 0 {
+			break
+		}
 
-		if _, err := conn.Write(
-			[]byte(response + "\n"),
-		); err != nil {
+		val, consumed, err := resp.DecodeFromBytes(c.buffer)
+		if err != nil {
+			if err == resp.ErrIncomplete {
+				break // Wait for more data in the next EPOLLIN event
+			}
+			return err // Protocol error, disconnect client
+		}
 
+		// Remove the parsed command from the buffer
+		c.buffer = c.buffer[consumed:]
+
+		// Execute the command if it's an Array
+		if val.Type == resp.Array {
 			logger.Logger.Printf(
-				"write failed: %v",
-				err,
+				"received command from fd %d: %+v",
+				c.fd,
+				val,
 			)
 
-			return
+			response := command.Dispatch(val)
+			c.Write(response)
 		}
 	}
 
-	if err := scanner.Err(); err != nil {
-		logger.Logger.Printf(
-			"connection read error: %v",
-			err,
-		)
+	return nil
+}
+
+func (c *Connection) Write(data []byte) {
+	var total int
+	for total < len(data) {
+		n, err := syscall.Write(c.fd, data[total:])
+		if err != nil {
+			if err == syscall.EAGAIN || err == syscall.EWOULDBLOCK {
+				continue
+			}
+			return
+		}
+		total += n
 	}
 }

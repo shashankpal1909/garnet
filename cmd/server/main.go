@@ -10,7 +10,7 @@ import (
 func main() {
 	cfg := config.Load()
 
-	srv := server.New(cfg)
+	srv := server.NewServer(cfg)
 
 	if err := srv.Start(); err != nil {
 		log.Fatal(err)

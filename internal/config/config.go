@@ -5,8 +5,9 @@ import "flag"
 // Config contains all runtime configuration required
 // to bootstrap and run a Garnet server instance.
 type Config struct {
-	Host string
-	Port int
+	Host       string
+	Port       int
+	MaxClients int
 }
 
 // Load parses command-line flags and returns
@@ -14,20 +15,27 @@ type Config struct {
 func Load() *Config {
 	host := flag.String(
 		"host",
-		"0.0.0.0",
+		DefaultHost,
 		"host address to bind",
 	)
 
 	port := flag.Int(
 		"port",
-		6379,
+		DefaultPort,
 		"tcp port to listen on",
+	)
+
+	maxClients := flag.Int(
+		"max-clients",
+		DefaultMaxClients,
+		"maximum concurrent clients for the epoll event loop",
 	)
 
 	flag.Parse()
 
 	return &Config{
-		Host: *host,
-		Port: *port,
+		Host:       *host,
+		Port:       *port,
+		MaxClients: *maxClients,
 	}
 }

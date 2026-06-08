@@ -1,55 +1,69 @@
+//go:build linux
+
 package server
 
 import (
 	"fmt"
 	"net"
+	"syscall"
 
 	"garnet/internal/config"
 	"garnet/internal/logger"
 )
 
-// Server manages the TCP listener and
-// incoming client connections.
 type Server struct {
-	cfg *config.Config
+	cfg         *config.Config
+	fd          int
+	epfd        int
+	connections map[int]*Connection
 }
 
-// New creates a new server instance.
-func New(cfg *config.Config) *Server {
+func NewServer(cfg *config.Config) *Server {
 	return &Server{
-		cfg: cfg,
+		cfg:         cfg,
+		connections: make(map[int]*Connection),
 	}
 }
 
-// Start begins listening for TCP connections
-// and blocks until the server terminates.
 func (s *Server) Start() error {
-	addr := fmt.Sprintf(
-		"%s:%d",
-		s.cfg.Host,
-		s.cfg.Port,
-	)
+	logger.Logger.Print(Banner)
+	logger.Logger.Printf("starting epoll server on %s:%d", s.cfg.Host, s.cfg.Port)
 
-	listener, err := net.Listen("tcp", addr)
+	// 1. Create socket
+	fd, err := syscall.Socket(syscall.AF_INET, syscall.SOCK_STREAM, 0)
 	if err != nil {
-		return err
+		return fmt.Errorf("socket error: %v", err)
+	}
+	s.fd = fd
+	defer syscall.Close(fd)
+
+	// Set SO_REUSEADDR
+	if err := syscall.SetsockoptInt(fd, syscall.SOL_SOCKET, syscall.SO_REUSEADDR, 1); err != nil {
+		return fmt.Errorf("setsockopt error: %v", err)
 	}
 
-	logger.Logger.Printf(
-		"server started on %s",
-		addr,
-	)
-
-	for {
-		conn, err := listener.Accept()
-		if err != nil {
-			logger.Logger.Printf(
-				"accept connection failed: %v",
-				err,
-			)
-			continue
-		}
-
-		go HandleConnection(conn)
+	// 2. Bind
+	ip := net.ParseIP(s.cfg.Host)
+	var addr [4]byte
+	copy(addr[:], ip.To4())
+	sa := &syscall.SockaddrInet4{
+		Port: s.cfg.Port,
+		Addr: addr,
 	}
+
+	if err := syscall.Bind(fd, sa); err != nil {
+		return fmt.Errorf("bind error: %v", err)
+	}
+
+	// 3. Listen
+	if err := syscall.Listen(fd, 1024); err != nil {
+		return fmt.Errorf("listen error: %v", err)
+	}
+
+	// 4. Set non-blocking
+	if err := syscall.SetNonblock(fd, true); err != nil {
+		return fmt.Errorf("setnonblock error: %v", err)
+	}
+
+	return s.startEventLoop()
 }
