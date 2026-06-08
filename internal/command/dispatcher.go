@@ -12,6 +12,9 @@ var registry = map[string]CommandFunc{
 	"PING":  Ping,
 	"HELLO": Hello,
 	"ECHO":  Echo,
+	"SET":   Set,
+	"GET":   Get,
+	"TTL":   TTL,
 }
 
 // Dispatch routes incoming commands to their corresponding handlers.
