@@ -49,6 +49,10 @@ func Set(args []resp.Value) []byte {
 	}
 
 	// Store the item with the computed TTL
-	store.Put(key, store.NewItem(val, exDurationMs))
+	err := store.Put(key, store.NewItem(val, exDurationMs))
+	if err != nil {
+		return resp.EncodeError(err.Error())
+	}
+
 	return resp.RESP_OK
 }

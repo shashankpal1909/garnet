@@ -32,3 +32,12 @@ func TestEncodeBulkString(t *testing.T) {
 		t.Errorf("EncodeBulkString() = %q, want %q", got, want)
 	}
 }
+
+func TestEncodeInteger(t *testing.T) {
+	got := resp.EncodeInteger(42)
+	want := []byte(":42\r\n")
+
+	if !bytes.Equal(got, want) {
+		t.Errorf("EncodeInteger() = %q, want %q", got, want)
+	}
+}

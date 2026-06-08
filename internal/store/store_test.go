@@ -7,7 +7,7 @@ import (
 
 func TestStore_PutAndGet(t *testing.T) {
 	// Clean store just in case
-	store = *New()
+	store = *New(0, &NoOpEvictor{})
 
 	item := NewItem("test_value", -1)
 	Put("test_key", item)
@@ -23,7 +23,7 @@ func TestStore_PutAndGet(t *testing.T) {
 }
 
 func TestStore_GetNonExistent(t *testing.T) {
-	store = *New()
+	store = *New(0, &NoOpEvictor{})
 	retrieved := Get("non_existent")
 	if retrieved != nil {
 		t.Fatalf("Expected nil for non-existent key, got %v", retrieved)
@@ -31,7 +31,7 @@ func TestStore_GetNonExistent(t *testing.T) {
 }
 
 func TestStore_Expiration(t *testing.T) {
-	store = *New()
+	store = *New(0, &NoOpEvictor{})
 
 	// 50ms TTL
 	item := NewItem("expire_me", 50)
@@ -59,7 +59,7 @@ func TestStore_Expiration(t *testing.T) {
 }
 
 func TestStore_ActiveExpire(t *testing.T) {
-	store = *New()
+	store = *New(0, &NoOpEvictor{})
 
 	// Put 10 persistent keys
 	for i := 0; i < 10; i++ {
@@ -94,4 +94,36 @@ func TestStore_ActiveExpire(t *testing.T) {
 	if len(store.data) != 10 {
 		t.Errorf("Expected exactly 10 persistent keys remaining, got %d", len(store.data))
 	}
+}
+
+func TestStore_Delete(t *testing.T) {
+	store = *New(0, &NoOpEvictor{})
+	Put("to_delete", NewItem("val", -1))
+
+	if !Delete("to_delete") {
+		t.Errorf("Expected true when deleting existing key")
+	}
+	if Delete("non_existent") {
+		t.Errorf("Expected false when deleting non-existent key")
+	}
+}
+
+func TestStore_UpdateExpire(t *testing.T) {
+	store = *New(0, &NoOpEvictor{})
+	Put("update_me", NewItem("val", -1))
+
+	// Update to expire
+	UpdateExpire("update_me", time.Now().UnixMilli()+10)
+	if _, exists := store.expires["update_me"]; !exists {
+		t.Errorf("Expected key to be added to expires map")
+	}
+
+	// Update to persistent
+	UpdateExpire("update_me", -1)
+	if _, exists := store.expires["update_me"]; exists {
+		t.Errorf("Expected key to be removed from expires map")
+	}
+
+	// Update non-existent
+	UpdateExpire("non_existent", -1)
 }

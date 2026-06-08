@@ -1,7 +1,9 @@
 package config
 
 const (
-	DefaultHost       = "0.0.0.0"
-	DefaultPort       = 6379
-	DefaultMaxClients = 10000
+	DefaultHost           = "0.0.0.0"
+	DefaultPort           = 6379
+	DefaultMaxClients     = 10000
+	DefaultMaxKeys        = 0
+	DefaultEvictionPolicy = NoEviction
 )

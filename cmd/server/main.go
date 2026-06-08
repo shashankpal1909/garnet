@@ -5,10 +5,13 @@ import (
 
 	"garnet/internal/config"
 	"garnet/internal/server"
+	"garnet/internal/store"
 )
 
 func main() {
 	cfg := config.Load()
+
+	store.Init(cfg)
 
 	srv := server.NewServer(cfg)
 

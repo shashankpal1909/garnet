@@ -76,6 +76,16 @@ Garnet currently supports the core set of Redis commands needed for caching and 
 
 *Note: More commands are constantly being added to the roadmap.*
 
+## 🧪 Testing
+
+Garnet comes with a comprehensive suite of unit tests. You can run the tests across the entire project using standard Go tooling:
+
+```bash
+go test ./... -v
+```
+
+This will run all tests, including the core store functionality, command parsing, and eviction strategies.
+
 ## 🤝 Contributing
 
 Contributions make the open-source community an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.

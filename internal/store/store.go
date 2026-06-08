@@ -1,6 +1,14 @@
 package store
 
-import "time"
+import (
+	"errors"
+	"time"
+
+	"garnet/internal/config"
+	"garnet/internal/logger"
+)
+
+var ErrMaxKeysExceeded = errors.New("maximum number of keys reached")
 
 // Item represents a stored value and its expiration metadata.
 type Item struct {
@@ -16,20 +24,25 @@ type Item struct {
 type Store struct {
 	data    map[string]*Item
 	expires map[string]struct{}
+	maxKeys int
+	evictor Evictor
 }
 
 // store is the global singleton instance.
 var store Store
 
-func init() {
-	store = *New()
+// Init initializes the global singleton store instance.
+func Init(cfg *config.Config) {
+	store = *New(cfg.MaxKeys, NewEvictor(cfg.EvictionPolicy))
 }
 
 // New creates and initializes a new Store.
-func New() *Store {
+func New(maxKeys int, evictor Evictor) *Store {
 	return &Store{
 		data:    make(map[string]*Item),
 		expires: make(map[string]struct{}),
+		maxKeys: maxKeys,
+		evictor: evictor,
 	}
 }
 
@@ -47,13 +60,25 @@ func NewItem(value interface{}, durationMs int64) *Item {
 }
 
 // Put inserts or updates an item in the store.
-func Put(k string, item *Item) {
+func Put(k string, item *Item) error {
+	_, exists := store.data[k]
+	// If it's a new key and we have a limit set, check if we need to evict.
+	if !exists && store.maxKeys > 0 && len(store.data) >= store.maxKeys {
+		deleted := store.evictor.Evict(&store)
+		if deleted == 0 {
+			logger.Logger.Printf("ErrMaxKeysExceeded: Failed to insert key '%s', max keys (%d) reached and no keys could be evicted", k, store.maxKeys)
+			return ErrMaxKeysExceeded
+		}
+	}
+
 	store.data[k] = item
 	if item.ExpiresAt != -1 {
 		store.expires[k] = struct{}{}
 	} else {
 		delete(store.expires, k)
 	}
+
+	return nil
 }
 
 // Get retrieves an item by key.
