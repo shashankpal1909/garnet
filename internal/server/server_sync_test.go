@@ -14,7 +14,7 @@ func TestServer_New(t *testing.T) {
 		Port: 6379,
 	}
 
-	srv := server.New(cfg)
+	srv := server.NewSyncServer(cfg)
 	if srv == nil {
 		t.Fatal("Expected New to return a Server instance, got nil")
 	}
@@ -35,7 +35,7 @@ func TestServer_StartError(t *testing.T) {
 		Port: port,
 	}
 
-	srv := server.New(cfg)
+	srv := server.NewSyncServer(cfg)
 
 	// Start should immediately return an error because the port is already bound by our listener
 	errCh := make(chan error, 1)

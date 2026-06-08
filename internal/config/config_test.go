@@ -16,7 +16,7 @@ func TestLoad(t *testing.T) {
 
 	// Reset flag.CommandLine to avoid panic from redefining flags across tests
 	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
-	os.Args = []string{"cmd", "--host=127.0.0.1", "--port=8080"}
+	os.Args = []string{"cmd", "--host=127.0.0.1", "--port=8080", "--mode=async", "--max-clients=500"}
 
 	cfg := config.Load()
 
@@ -26,6 +26,14 @@ func TestLoad(t *testing.T) {
 
 	if cfg.Port != 8080 {
 		t.Errorf("Expected port 8080, got %d", cfg.Port)
+	}
+
+	if cfg.Mode != "async" {
+		t.Errorf("Expected mode async, got %s", cfg.Mode)
+	}
+
+	if cfg.MaxClients != 500 {
+		t.Errorf("Expected max clients 500, got %d", cfg.MaxClients)
 	}
 }
 
@@ -47,5 +55,9 @@ func TestLoadDefaults(t *testing.T) {
 
 	if cfg.Port != config.DefaultPort {
 		t.Errorf("Expected port %d, got %d", config.DefaultPort, cfg.Port)
+	}
+
+	if cfg.MaxClients != config.DefaultMaxClients {
+		t.Errorf("Expected max clients %d, got %d", config.DefaultMaxClients, cfg.MaxClients)
 	}
 }

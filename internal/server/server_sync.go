@@ -8,22 +8,22 @@ import (
 	"garnet/internal/logger"
 )
 
-// Server manages the TCP listener and
+// SyncServer manages the TCP listener and
 // incoming client connections.
-type Server struct {
+type SyncServer struct {
 	cfg *config.Config
 }
 
-// New creates a new server instance.
-func New(cfg *config.Config) *Server {
-	return &Server{
+// NewSyncServer creates a new server instance.
+func NewSyncServer(cfg *config.Config) *SyncServer {
+	return &SyncServer{
 		cfg: cfg,
 	}
 }
 
 // Start begins listening for TCP connections
 // and blocks until the server terminates.
-func (s *Server) Start() error {
+func (s *SyncServer) Start() error {
 
 	addr := fmt.Sprintf(
 		"%s:%d",
@@ -57,6 +57,6 @@ func (s *Server) Start() error {
 			continue
 		}
 
-		go HandleConnection(conn)
+		HandleConnection(conn)
 	}
 }
